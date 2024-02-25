@@ -9,25 +9,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Component
 public class HotelReservationFactory extends AbstractReservationFactory {
 
     private final IHotelSevice iHotelSevice;
-    private final IUserService iUserService;
 
     @Autowired
-    public HotelReservationFactory(IHotelSevice iHotelSevice, IUserService iUserService) {
+    public HotelReservationFactory(IHotelSevice iHotelSevice) {
         this.iHotelSevice = iHotelSevice;
-        this.iUserService = iUserService;
     }
 
     @Override
-    public Reservation createReservation(Object hotel) {// Hotel obj
-
-        Hotel hotelDataBase = (Hotel) hotel;
-        iHotelSevice.saveHotelReservation(hotelDataBase);
-        return new HotelBookingDTO(hotelDataBase.getHotelCode(), hotelDataBase.getUserList(), hotelDataBase.getPrice(), hotelDataBase.getNights(), hotelDataBase.getId());
+    public Reservation createReservation(Object newBooking) {
+        Hotel hotel = (Hotel) newBooking;
+        iHotelSevice.saveHotelReservation(hotel);
+        return  new HotelBookingDTO(hotel.getHotelCode(), hotel.getUserList(), hotel.getPrice(), hotel.getNights());
     }
 }

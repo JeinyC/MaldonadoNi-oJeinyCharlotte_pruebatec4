@@ -1,13 +1,11 @@
 package com.example.Agency.service;
 
 import com.example.Agency.model.Flight;
+import com.example.Agency.model.Hotel;
 import com.example.Agency.model.User;
 import com.example.Agency.repository.FlightRepo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -29,35 +27,12 @@ public class FlightService implements IFlightService {
 
     @Override
     public List<Flight> findAvailableFlight(LocalDate date, String origin, String destination) {
-        return flightRepo.findAvailableFlight(date,origin,destination);
-    }
-
-    public Flight findFlightReservation(Flight flightReservation) {
-
-        Flight existingFlight = flightRepo.findAll()
-                .stream()
-                .filter(f ->
-                        f.getOrigin().equals(flightReservation.getOrigin()) &&
-                        f.getDestination().equals(flightReservation.getDestination()) &&
-                        f.getDate().equals(flightReservation.getDate()))
-                .findFirst()
-                .orElse(null);
-
-        flightReservation.setId(existingFlight.getId());
-        flightReservation.setFlightNumber(existingFlight.getFlightNumber());
-        flightReservation.setName(existingFlight.getName());
-        flightReservation.setSeatType(existingFlight.getSeatType());
-        flightReservation.setPrice(existingFlight.getPrice());
-        return flightReservation;
+        return flightRepo.findAvailableFlight(date, origin, destination);
     }
 
     @Override
-    public void saveFlightReservation(Flight flightReservation, Long id, List<User> userList){
-        Optional<Flight> optionalFlight = findFlight(id);
-        if (optionalFlight.isPresent()) {
-            flightReservation.setUserList(userList);
-            flightRepo.save(flightReservation);
-        }
+    public void saveFlightReservation(Flight flight) {
+        this.flightRepo.save(flight);
     }
 
     @Override
@@ -69,6 +44,20 @@ public class FlightService implements IFlightService {
         existingFlight.setSeatType(updatedFlight.getSeatType());
         existingFlight.setPrice(updatedFlight.getPrice());
         existingFlight.setDate(updatedFlight.getDate());
+
+        // Eliminar usuarios desasociados
+        List<User> existingUsers = existingFlight.getUserList();
+        List<User> updatedUsers = updatedFlight.getUserList();
+
+        existingUsers.removeIf(user -> !updatedUsers.contains(user));
+
+        // Añadir nuevos usuarios
+        for (User updatedUser : updatedUsers) {
+            if (!existingUsers.contains(updatedUser)) {
+                existingUsers.add(updatedUser);
+            }
+        }
+
         flightRepo.save(existingFlight);
         return existingFlight;
     }
@@ -79,12 +68,12 @@ public class FlightService implements IFlightService {
     }
 
     @Override
-    public void saveFlight(List<Flight> flights) {
-        flightRepo.saveAll(flights);
-    }
-
-    @Override
-    public void deleteFlight(Long id) {
-        flightRepo.deleteById(id);
+    public boolean validateAndDeleteFlight(Long id) {
+        Optional<Flight> existingHotel = findFlight(id);
+        if (existingHotel.get().getUserList().isEmpty()) {
+            flightRepo.deleteById(id);
+            return true;
+        }
+        return false;
     }
 }

@@ -8,6 +8,7 @@ import com.example.Agency.exception.MissingParametersException;
 import com.example.Agency.model.Hotel;
 import com.example.Agency.model.HotelReservationFactory;
 import com.example.Agency.model.Reservation;
+import com.example.Agency.model.User;
 import com.example.Agency.service.IHotelSevice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,15 +45,15 @@ public class HotelController {
     @GetMapping("/hotels/{id}")
     public ResponseEntity<?> getHotelById(@PathVariable Long id) {
         Optional<Hotel> hotel = iHotelSevice.findHotel(id);
-        if (hotel.isPresent()){
+        if (hotel.isPresent()) {
             return ResponseEntity.ok(hotel.get());
-        }else {
+        } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No hotel available with Id " + id);
         }
     }
 
     @GetMapping("/hotels/searchByDateAndCity")
-    public  ResponseEntity<?>  searchHotels(
+    public ResponseEntity<?> searchHotels(
             @RequestParam(name = "dateFrom", required = false) LocalDate dateFrom,
             @RequestParam(name = "dateTo", required = false) LocalDate dateTo,
             @RequestParam(name = "city", required = false) String city
@@ -59,7 +61,7 @@ public class HotelController {
         if (dateFrom == null || dateTo == null || city == null) {
             throw new MissingParametersException("All three parameters are required: dateFrom, dateTo and city");
         }
-        List<Hotel> hotels = iHotelSevice.findAvailableHotels(dateFrom, dateTo,city);
+        List<Hotel> hotels = iHotelSevice.findAvailableHotels(dateFrom, dateTo, city);
         if (!hotels.isEmpty()) {
             return ResponseEntity.ok(hotels);
         } else {
@@ -67,47 +69,36 @@ public class HotelController {
         }
     }
 
-    @PutMapping("/hotel-booking/new")
-    public ResponseEntity<String> hotelBooking(@RequestBody HotelBookingDTO hotelBookingDTO) {
-
-        String hotelCode = hotelBookingDTO.getHotelCode();
-
-
-        Hotel existingHotel = iHotelSevice.findHotelByCode(hotelCode);
-
-        if (existingHotel != null) {
+    @PostMapping("/hotels/new")
+    public ResponseEntity<List<String>> saveHotel(@RequestBody List<Hotel> hotels) {
+        List<String> responses = new ArrayList<>();
+        for (Object hotel : hotels) {
             try {
-                existingHotel.setUserList(hotelBookingDTO.getUserList());
-                Reservation reservation = reservationFactory.createReservation(existingHotel);
-                reservation.confirmReservation();
-                return buildResponse("Successful hotel reservation", HttpStatus.OK);
+                Reservation reservation = reservationFactory.createReservation(hotel);
+                responses.add(reservation.confirmReservation());
+            } catch (HotelNotFoundException e) {
+                responses.add(e.getMessage());
             } catch (Exception e) {
-                return handleGenericException(e);
+                responses.add("Error processing reservation");
+                e.printStackTrace();  // Imprimir la pila de excepciones para depuración
+                responses.add("Error al procesar la reserva: " + e.getMessage());
             }
-        } else {
-            return buildResponse("Non-existent hotel", HttpStatus.NOT_FOUND);
         }
+        return ResponseEntity.ok(responses);
     }
 
     @DeleteMapping("/hotels/delete/{id}")
     public ResponseEntity<String> deleteHotel(@PathVariable Long id) {
         try {
-            iHotelSevice.validateAndDeleteHotel(id);
-            return buildResponse("Hotel deleted successfully", HttpStatus.OK);
+            if (iHotelSevice.validateAndDeleteHotel(id)) {
+                return buildResponse("Hotel deleted successfully", HttpStatus.OK);
+            } else {
+                return buildResponse("Hotel is already reserved", HttpStatus.NOT_ACCEPTABLE);
+            }
         } catch (HotelNotFoundException e) {
             return buildResponse(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (HotelReservationException e) {
             return buildResponse(e.getMessage(), HttpStatus.CONFLICT);
-        } catch (Exception e) {
-            return handleGenericException(e);
-        }
-    }
-
-    @PostMapping("/hotels/new")
-    public ResponseEntity<String> saveHotel(@RequestBody List<Hotel> hotels) {
-        try {
-            iHotelSevice.saveHotel(hotels);
-            return buildResponse("Hotel added to the system", HttpStatus.OK);
         } catch (Exception e) {
             return handleGenericException(e);
         }

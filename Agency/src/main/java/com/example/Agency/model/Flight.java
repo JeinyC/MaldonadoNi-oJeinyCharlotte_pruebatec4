@@ -22,10 +22,9 @@ public class Flight{
     private String origin;
     private String destination;
     private String seatType;
-    private double price;
+    private Double price;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "flightReservation_id")
     private List<User> userList;
-
 }

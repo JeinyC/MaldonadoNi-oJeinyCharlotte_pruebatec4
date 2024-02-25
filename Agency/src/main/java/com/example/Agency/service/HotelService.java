@@ -1,6 +1,7 @@
 package com.example.Agency.service;
 
 import com.example.Agency.model.Hotel;
+import com.example.Agency.model.User;
 import com.example.Agency.repository.HotelRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,6 @@ public class HotelService implements IHotelSevice {
     public void saveHotelReservation(Hotel hotel) {
         hotel.setNights((int) ChronoUnit.DAYS.between(hotel.getDateFrom(), hotel.getDateTo()));
         hotel.setBooked(true);
-        hotel.setUserList(hotel.getUserList());
         this.hotelRepo.save(hotel);
     }
 
@@ -48,18 +48,18 @@ public class HotelService implements IHotelSevice {
         existingHotel.setPrice(updatedHotel.getPrice());
         existingHotel.setNights(updatedHotel.getNights());
         existingHotel.setBooked(updatedHotel.isBooked());
+
+        List<User> existingUsers = existingHotel.getUserList();
+        List<User> updatedUsers = updatedHotel.getUserList();
+        existingUsers.removeIf(user -> !updatedUsers.contains(user));
+
+        for (User updatedUser : updatedUsers) {
+            if (!existingUsers.contains(updatedUser)) {
+                existingUsers.add(updatedUser);
+            }
+        }
         hotelRepo.save(existingHotel);
         return existingHotel;
-    }
-
-    @Override
-    public void deleteHotel(Long id) {
-        hotelRepo.deleteById(id);
-    }
-
-    @Override
-    public void saveHotel(List<Hotel> hotels) {
-        hotelRepo.saveAll(hotels);
     }
 
     @Override
@@ -68,22 +68,14 @@ public class HotelService implements IHotelSevice {
     }
 
     @Override
-    public void validateAndDeleteHotel(Long id) {
+    public boolean validateAndDeleteHotel(Long id) {
         Optional<Hotel> existingHotel = findHotel(id);
 
         if (existingHotel.get().getUserList().isEmpty()) {
-            deleteHotel(id);
+            hotelRepo.deleteById(id);
+            return true;
         }
-    }
-
-    @Override
-    public Hotel findHotelByCode(String hotelCode) {
-        for (Hotel hotel : hotelRepo.findAll()) {
-            if (hotel.getHotelCode().equalsIgnoreCase(hotelCode)) {
-                return hotel;
-            }
-        }
-        return null;
+        return false;
     }
 }
 

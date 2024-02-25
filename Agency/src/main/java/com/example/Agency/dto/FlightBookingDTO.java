@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import java.time.LocalDate;
 import java.util.List;
 @Setter
 @Getter
@@ -15,13 +14,11 @@ import java.util.List;
 public class FlightBookingDTO implements Reservation {
 
     private List<User> userList;
-    private String origin;
     private String destination;
-    private LocalDate date;
-    private double price;
-
+    private Double price;
+    private String flightNumber;
     @Override
     public String confirmReservation() {
-        return "The total price is "  + price * userList.size();
+        return "Flight : " + flightNumber + " The total price is "  + price * userList.size() + " Destination : " + destination;
     }
 }

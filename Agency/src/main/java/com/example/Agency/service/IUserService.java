@@ -6,5 +6,7 @@ import com.example.Agency.model.User;
 import java.util.List;
 
 public interface IUserService {
-    void saveUser(List<User> users);
+    List<User> getUsers();
+    //void saveUser(List<User> users);
+    void saveUser(User users);
 }
