@@ -1,7 +1,6 @@
 package com.example.Agency.service;
 
 import com.example.Agency.model.Flight;
-import com.example.Agency.model.Hotel;
 import com.example.Agency.model.User;
 import com.example.Agency.repository.FlightRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,13 +44,12 @@ public class FlightService implements IFlightService {
         existingFlight.setPrice(updatedFlight.getPrice());
         existingFlight.setDate(updatedFlight.getDate());
 
-        // Eliminar usuarios desasociados
+
         List<User> existingUsers = existingFlight.getUserList();
         List<User> updatedUsers = updatedFlight.getUserList();
 
         existingUsers.removeIf(user -> !updatedUsers.contains(user));
 
-        // Añadir nuevos usuarios
         for (User updatedUser : updatedUsers) {
             if (!existingUsers.contains(updatedUser)) {
                 existingUsers.add(updatedUser);

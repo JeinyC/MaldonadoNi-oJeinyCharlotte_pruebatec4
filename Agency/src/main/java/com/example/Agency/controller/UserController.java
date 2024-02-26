@@ -1,8 +1,0 @@
-package com.example.Agency.controller;
-
-import org.springframework.web.bind.annotation.RestController;
-
-@RestController
-public class UserController {
-
-}

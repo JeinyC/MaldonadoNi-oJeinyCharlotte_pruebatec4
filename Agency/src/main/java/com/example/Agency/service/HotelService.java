@@ -5,7 +5,6 @@ import com.example.Agency.model.User;
 import com.example.Agency.repository.HotelRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;

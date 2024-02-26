@@ -1,6 +1,5 @@
 package com.example.Agency.controller;
 
-import com.example.Agency.dto.HotelBookingDTO;
 import com.example.Agency.exception.HotelException;
 import com.example.Agency.exception.HotelNotFoundException;
 import com.example.Agency.exception.HotelReservationException;
@@ -8,7 +7,6 @@ import com.example.Agency.exception.MissingParametersException;
 import com.example.Agency.model.Hotel;
 import com.example.Agency.model.HotelReservationFactory;
 import com.example.Agency.model.Reservation;
-import com.example.Agency.model.User;
 import com.example.Agency.service.IHotelSevice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -79,9 +77,7 @@ public class HotelController {
             } catch (HotelNotFoundException e) {
                 responses.add(e.getMessage());
             } catch (Exception e) {
-                responses.add("Error processing reservation");
-                e.printStackTrace();  // Imprimir la pila de excepciones para depuración
-                responses.add("Error al procesar la reserva: " + e.getMessage());
+                responses.add("Error: " + e.getMessage());
             }
         }
         return ResponseEntity.ok(responses);
@@ -123,23 +119,8 @@ public class HotelController {
         return new ResponseEntity<>(message, status);
     }
 
-    @ExceptionHandler(MissingParametersException.class)
-    public ResponseEntity<String> handleMissingParametersException(MissingParametersException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-    }
-
-    @ExceptionHandler(HotelNotFoundException.class)
-    public ResponseEntity<String> handleHotelNotFoundException(HotelNotFoundException e) {
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGenericException(Exception e) {
         return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @ExceptionHandler(HotelException.class)
-    public ResponseEntity<String> handleHotelException(HotelException e) {
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

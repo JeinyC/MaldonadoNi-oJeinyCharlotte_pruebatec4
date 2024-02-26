@@ -19,13 +19,11 @@ import java.util.Optional;
 public class FlightController {
 
     private final IFlightService iFlightService;
-    private final IUserService iUserService;
     private final FlightReservationFactory reservationFactory;
 
     @Autowired
     public FlightController(IFlightService iFlightService, IUserService iUserService, FlightReservationFactory reservationFactory) {
         this.iFlightService = iFlightService;
-        this.iUserService = iUserService;
         this.reservationFactory = reservationFactory;
     }
 
@@ -119,16 +117,6 @@ public class FlightController {
 
     private ResponseEntity<String> buildResponse(String message, HttpStatus status) {
         return new ResponseEntity<>(message, status);
-    }
-
-    @ExceptionHandler(MissingParametersException.class)
-    public ResponseEntity<String> handleMissingParametersException(MissingParametersException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-    }
-
-    @ExceptionHandler(FlightNotFoundException.class)
-    public ResponseEntity<String> handleFlightNotFoundException(FlightNotFoundException e) {
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)
