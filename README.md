@@ -1,4 +1,4 @@
-# Prueba Técnica Nº 2 - Java Avanzado
+# Prueba Técnica Nº 4 - Java Avanzado
 
 ![Título](Agency/docs/img/header.png)
 El objetivo de este desafío es aplicar los contenidos dados hasta el momento durante el BOOTCAMP (Git, Java, Spring Boot, Testing, JPA + Hibernate, Spring Security y JWT) en la implementación de una API REST.
@@ -9,7 +9,7 @@ El objetivo de este desafío es aplicar los contenidos dados hasta el momento du
 En este proyecto se permite la reserva y lectura de dos servicios que ofrece la agencia.
 Solo el personal autorizado podra acceder a la edicion y eliminación de reservas.
 > Se opto por desarrollarlo usando los siguientes patrones de diseño
-- `DTO` para transferir datos entre el cliente y el servidor. Crea objetos DTO específicos de hotel y vuelo para las solicitudes y respuestas de cada historia de usuario.
+- `DTO` para transferir datos entre el cliente y el servidor. Crea objetos `DTO` específicos de hotel y vuelo para las solicitudes y respuestas de cada historia de usuario.
 -  Abstract Factory debido a su encapsulación que proporciona un nivel de abstracción y mantiene el código modular y fácil de entender, a su consistencia al poder definir métodos comunes que todas las fábricas deben implementar y por su extensibilidad pensando a largo plazo esto permite agregar más tipos de reservas o funcionalidades comunes a todas las fábricas, la clase abstracta proporciona un lugar central para realizar modificaciones.
 
 <p align="center">
